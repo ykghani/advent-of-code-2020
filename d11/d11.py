@@ -93,6 +93,3 @@ while True:
         break
     else:
         update_grid(grid, worthiness)
-    
-    print_grid(grid)
-    print('\n')
