@@ -45,7 +45,7 @@ def in_range(val: int, ranges: list) -> bool:
     return False
 
 def check_ticket_validity(ticket: list, rules: dict):
-    '''Checks if a ticket is valid. Returns integer value that is not valild for any field or None if valid'''
+    '''Checks if a ticket is valid. Returns integer value that is not valild for any field or 0 if valid'''
     invalid_value = 0
     for number in ticket:
         if not any(in_range(number, rule) for rule in rules.values()):
@@ -53,7 +53,47 @@ def check_ticket_validity(ticket: list, rules: dict):
     return invalid_value
 
 part_one = 0
+valid_tickets = []
 for tic in all_tickets:
-    part_one += check_ticket_validity(tic, fields_dict)
-
+    value = check_ticket_validity(tic, fields_dict)
+    part_one += value
+    if value == 0:
+        valid_tickets.append(tic)
+        
 print(f"Part 1: {part_one}")
+
+###PART TWO###
+
+def field_matches_values(values: list, ranges: list[tuple[int, int]]) -> bool:
+    return all(in_range(val, ranges) for val in values)
+
+def find_matching_fields(attribute_values: list, fields_dict: dict, valid_fields=None) -> list:
+    '''Returns list of matching fields for a given attribute'''
+    matching_fields = []
+    if valid_fields is None:
+        valid_fields = list(fields_dict.keys())
+
+    for field in valid_fields:
+        if field_matches_values(attribute_values, fields_dict[field]):
+            matching_fields.append(field)
+
+    return matching_fields
+
+attributes = [[attr[i] for attr in valid_tickets] for i in range(len(valid_tickets[0]))] #attribute 0 will be 0th element in all tickets
+
+field_mapping = {}
+part_two = 1
+valid_fields = list(fields_dict.keys())
+while len(field_mapping) < len(fields_dict):
+    for idx, attr in enumerate(attributes):
+        if idx in field_mapping.values(): 
+            continue
+        potential_fields = find_matching_fields(attr, fields_dict, valid_fields)
+        if len(potential_fields) == 1: #only 1 match, must be that attribute!
+            key = potential_fields[0]
+            field_mapping[key] = idx
+            if 'departure' in key:
+                part_two *= my_ticket[idx]
+            valid_fields.remove(key)
+
+print(f"Part two: {part_two}")
